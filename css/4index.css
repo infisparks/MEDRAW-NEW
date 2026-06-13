@@ -181,8 +181,8 @@
   overflow: hidden;
 }
 .product-search-box:focus-within {
-  border-color: #0b5ed7;
-  box-shadow: 0 4px 20px rgba(11, 94, 215, 0.12);
+  border-color: #055722;
+  box-shadow: 0 4px 20px rgba(5, 87, 34, 0.12);
   transform: translateY(-2px);
 }
 .product-search-input {
@@ -207,7 +207,7 @@
   transition: color 0.3s ease;
 }
 .product-search-box:focus-within .search-icon {
-  color: #0b5ed7;
+  color: #055722;
 }
 .clear-search-btn {
   position: absolute;
@@ -282,7 +282,7 @@
 .popup-title {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #0b5ed7; /* Theme blue color matching Enquire Now heading */
+  color: #055722; /* Theme green color matching Enquire Now heading */
   margin: 0 0 10px 0;
   letter-spacing: -0.5px;
 }
@@ -324,9 +324,9 @@
   color: #334155 !important;
 }
 .popup-form-control:focus {
-  border-color: #0b5ed7 !important;
+  border-color: #055722 !important;
   background: #fff !important;
-  box-shadow: 0 0 0 4px rgba(11, 94, 215, 0.15) !important;
+  box-shadow: 0 0 0 4px rgba(5, 87, 34, 0.15) !important;
 }
 .popup-form-control::placeholder {
   color: #94a3b8 !important;
@@ -368,7 +368,7 @@
 }
 .custom-option:hover {
   background: #f1f5f9;
-  color: #0b5ed7;
+  color: #055722;
 }
 
 @media (max-height: 650px) {

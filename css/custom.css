@@ -45,11 +45,11 @@
 /************************************/
 
 :root {
-	--primary-color: #0B1030;
-	--secondary-color: #F3F3FF;
+	--primary-color: #04210e;
+	--secondary-color: #F0F7F2;
 	--text-color: #556171;
-	--accent-color: #4753BF;
-	--accent-color-two: #506CD7;
+	--accent-color: #055722;
+	--accent-color-two: #087d32;
 	--white-color: #FFFFFF;
 	--divider-color: #55617124;
 	--dark-divider-color: #FFFFFF24;
@@ -444,7 +444,7 @@ body {
 /************************************/
 
 .topbar {
-	background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-color-two) 100%);
+	background: #055722;
 	padding: 15px 0;
 }
 
@@ -474,6 +474,7 @@ body {
 	color: var(--white-color);
 	display: flex;
 	align-items: center;
+	transition: all 0.3s ease-in-out;
 }
 
 .topbar-contact-info ul li a span {
@@ -488,8 +489,12 @@ body {
 	transition: all 0.3s ease-in-out;
 }
 
+.topbar-contact-info ul li a:hover {
+	color: #51c67d;
+}
+
 .topbar-contact-info ul li a:hover i {
-	color: var(--primary-color);
+	color: #51c67d;
 }
 
 .topbar-social-details {
@@ -522,6 +527,7 @@ body {
 
 .topbar-social-icons ul li a {
 	color: inherit;
+	transition: all 0.3s ease-in-out;
 }
 
 .topbar-social-icons ul li a i {
@@ -531,7 +537,7 @@ body {
 }
 
 .topbar-social-icons ul li a:hover i {
-	color: var(--primary-color);
+	color: #51c67d;
 }
 
 header.main-header {
@@ -1589,7 +1595,7 @@ header.main-header .header-sticky.active {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: linear-gradient(180deg, rgba(11, 16, 48, 0) 0%, #0B1030 100%);
+	background: linear-gradient(180deg, rgba(4, 33, 14, 0) 0%, var(--primary-color) 100%);
 	width: 100%;
 	height: 100%;
 	z-index: 0;
@@ -4562,8 +4568,8 @@ header.main-header .header-sticky.active {
 
 /* Contact CTA sidebar card */
 .faq-sidebar-cta {
-	background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
-	border-color: #c5dff5;
+	background: linear-gradient(135deg, #f0f7f2 0%, #e2f0e6 100%);
+	border-color: #c5e8cf;
 	text-align: center;
 }
 .faq-cta-icon {
