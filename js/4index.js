@@ -118,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
         { name: "Thymogam", drug: "Anti-Thymocyte Globulin", image: "images/8.png" },
         { name: "VIVJOA", drug: "Oteseconazole", image: "images/9.png" },
         { name: "TORSEMIDE 20MG", drug: "TORSEMIDE", image: "images/10.png" },
-        { name: "Tryprine 300", drug: "Trientine Hydrochloride USP", image: "images/11.png" },
         { name: "Ef-Cort 100", drug: "Hydrocortisone Sodium Succinate IP", image: "images/12.png" },
         { name: "Duomate Transhaler", drug: "Formoterol Fumarate and Beclomethasone Dipropionate Powder For Inhalation", image: "images/13.png" },
         { name: "Forxiga 10mg", drug: "Dapagliflozin", image: "images/14.png" },
