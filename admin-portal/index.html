@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description"
+        content="Medraw Pharmaceuticals Admin Portal. Security managed via Firebase Authentication.">
+
+    <title>Admin Portal | Medraw Pharmaceuticals</title>
+
+    <!-- Favicon Icon -->
+    <link rel="shortcut icon" type="image/x-icon" href="../images/new-favicon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome Icon CSS -->
+    <link href="../css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Admin Portal CSS -->
+    <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/add-product.css" rel="stylesheet">
+</head>
+
+<body class="admin-body">
+
+    <!-- INITIAL STARTUP LOADER -->
+    <div id="startup-loader"
+        class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex flex-column justify-content-center align-items-center"
+        style="z-index: 99999;">
+        <div class="table-spinner mb-3"></div>
+        <div class="table-loader-text">Loading Admin Portal...</div>
+    </div>
+
+    <!-- ────────────────────────────────────────────────
+    * LOGIN CONTAINER
+    * ──────────────────────────────────────────────── -->
+    <div id="login-container" class="login-wrapper d-none">
+        <div class="login-card">
+            <img src="../images/new-logo.png" alt="Medraw Logo" class="login-logo">
+            <h1 class="login-title">Medraw Portal</h1>
+            <p class="login-subtitle">Please sign in to unlock administrative access</p>
+
+            <form id="loginForm">
+                <div class="admin-form-group">
+                    <label for="loginEmail" class="admin-form-label">Email Address</label>
+                    <input type="email" id="loginEmail" class="admin-form-input" placeholder="admin@medraw.com" required
+                        autocomplete="email">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="loginPassword" class="admin-form-label">Password</label>
+                    <input type="password" id="loginPassword" class="admin-form-input" placeholder="••••••••" required
+                        autocomplete="current-password">
+                </div>
+
+                <button type="submit" id="loginBtn" class="btn-admin-submit">
+                    Log In <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ────────────────────────────────────────────────
+    * DASHBOARD CONTAINER
+    * ──────────────────────────────────────────────── -->
+    <div id="dashboard-container" class="dashboard-wrapper d-none">
+
+        <!-- SIDEBAR BACKDROP -->
+        <div class="sidebar-backdrop d-none" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-left">
+                    <img src="../images/new-logo.png" alt="Medraw" class="sidebar-logo">
+                    <h2 class="sidebar-title">Medraw</h2>
+                </div>
+                <button class="btn-sidebar-toggle-desktop d-none d-lg-flex" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <button class="btn-sidebar-close d-lg-none" onclick="toggleSidebar()" aria-label="Close Sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <div id="nav-enquiries" class="sidebar-nav-link active" onclick="switchTab('enquiries')">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        <span>Product Enquiries</span>
+                    </div>
+                </li>
+                <li class="sidebar-nav-item">
+                    <div id="nav-quotes" class="sidebar-nav-link" onclick="switchTab('quotes')">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Quote Requests</span>
+                    </div>
+                </li>
+                <li class="sidebar-nav-item">
+                    <div id="nav-contacts" class="sidebar-nav-link" onclick="switchTab('contacts')">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Contact Messages</span>
+                    </div>
+                </li>
+                <li class="sidebar-nav-item">
+                    <div id="nav-add-product" class="sidebar-nav-link" onclick="switchTab('add-product')">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>Add Product</span>
+                    </div>
+                </li>
+                <li class="sidebar-nav-item">
+                    <div id="nav-my-products" class="sidebar-nav-link" onclick="switchTab('my-products')">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>My Products</span>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-info">
+                    <div class="user-avatar" id="user-avatar-char">A</div>
+                    <div class="user-details">
+                        <p class="user-name" id="user-email-display">admin@medraw.com</p>
+                        <p class="user-role">Administrator</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn-sidebar-logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT PANEL -->
+        <main class="admin-main">
+            <div class="content-header">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-sidebar-toggle d-lg-none" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="content-title-wrapper">
+                        <h2 id="page-title">Product Enquiries</h2>
+                        <p id="page-subtitle">Manage and track submissions from the quick enquiry form</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROLS & STATS -->
+            <div class="controls-bar">
+                <div class="search-box-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-box-icon"></i>
+                    <input type="text" id="adminSearchInput" class="search-box-input"
+                        placeholder="Search entries by name, email, etc...">
+                </div>
+                <div class="stats-badge">
+                    <span id="entries-count-label">Total: 0 Entries</span>
+                </div>
+            </div>
+
+            <!-- DATA TABLE CARD -->
+            <div class="table-card">
+                <!-- Table Spinner Loader -->
+                <div id="table-loader" class="table-loader-wrapper">
+                    <div class="table-spinner"></div>
+                    <div class="table-loader-text">Fetching data in real-time...</div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state d-none">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h4 class="empty-state-title">No entries found</h4>
+                    <p class="empty-state-text">No records match your criteria or none have been submitted yet.</p>
+                </div>
+
+                <!-- Enquiries Table -->
+                <div id="enquiries-table-wrapper" class="table-responsive d-none">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Interested Product</th>
+                                <th>Requirement / Description</th>
+                                <th style="width: 80px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enquiries-tbody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quote Requests Table -->
+                <div id="quotes-table-wrapper" class="table-responsive d-none">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Requester Name</th>
+                                <th>Profile</th>
+                                <th>Contact Info</th>
+                                <th>Location (Country/Zip)</th>
+                                <th style="width: 80px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quotes-tbody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Contact Messages Table -->
+                <div id="contact-table-wrapper" class="table-responsive d-none">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Name</th>
+                                <th>Reason for Contact</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Message</th>
+                                <th style="width: 80px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contacts-tbody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- My Products Table -->
+                <div id="my-products-table-wrapper" class="table-responsive d-none">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Date & Time Added</th>
+                                <th style="width: 150px; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="my-products-tbody">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADD PRODUCT FORM WRAPPER -->
+            <div id="add-product-wrapper" class="add-product-wrapper d-none">
+                <form id="addProductForm" class="add-product-form">
+
+                    <!-- Card 1: Basic Info & Product Image -->
+                    <div class="form-card animate fadeIn" id="basic-info-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-circle-info card-icon"></i>
+                                <span>Basic Details & Product Image</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="prodName">Product Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="prodName" class="form-control"
+                                        placeholder="Enter Product Name" required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="prodCategory">Product Category <span
+                                            class="text-danger">*</span></label>
+                                    <select id="prodCategory" class="form-select" required
+                                        onchange="handleCategoryChange()">
+                                        <option value="" disabled selected>Choose a category...</option>
+                                        <option value="pharmaceuticals">Pharmaceuticals</option>
+                                        <option value="apis-bulk">APIs & Bulk Drugs</option>
+                                        <option value="surgical-supplies">Surgical Supplies</option>
+                                        <option value="medical-devices">Medical Devices</option>
+                                        <option value="lab-equipment">Laboratory Equipment</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label" for="prodDesc">Product Description <span
+                                            class="text-danger">*</span></label>
+                                    <textarea id="prodDesc" class="form-control" rows="4"
+                                        placeholder="Write a detailed product description, purpose, and benefits"
+                                        required></textarea>
+                                </div>
+                                <div class="col-lg-12 mb-2">
+                                    <label class="form-label">Product Image</label>
+                                    <div class="image-upload-zone" id="imageUploadZone">
+                                        <input type="file" id="prodImage" class="d-none" accept=".jpg,.jpeg,.png,.webp">
+                                        <div class="upload-icon">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </div>
+                                        <div class="upload-instructions">
+                                            Drag & drop product image here or <span>browse files</span>
+                                            <br>
+                                            <small class="text-muted">Max size: 500 KB (5:7 ratio)</small>
+                                        </div>
+                                        <div class="image-preview-overlay d-none" id="imagePreviewOverlay">
+                                            <img id="imagePreviewImg" src="" alt="Preview">
+                                            <button type="button" class="btn-remove-preview"
+                                                onclick="resetImageUpload()">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Specifications & Packaging -->
+                    <div class="form-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-gears card-icon"></i>
+                                <span>Specifications & Packaging Details</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <h5 class="mb-3 text-success font-weight-bold"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Technical Specifications</h5>
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="specStrength">Strength</label>
+                                    <input type="text" id="specStrength" class="form-control"
+                                        placeholder="e.g., 500 mg">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="specDosage">Dosage Form</label>
+                                    <input type="text" id="specDosage" class="form-control"
+                                        placeholder="e.g., Tablet, Capsule, Injection">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="specPacking">Packing</label>
+                                    <input type="text" id="specPacking" class="form-control"
+                                        placeholder="e.g., 10 x 10 Tablets">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="specShelfLife">Shelf Life</label>
+                                    <input type="text" id="specShelfLife" class="form-control"
+                                        placeholder="e.g., 24 Months">
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <label class="form-label" for="specStorage">Storage Conditions</label>
+                                    <textarea id="specStorage" class="form-control" rows="2"
+                                        placeholder="Enter storage conditions"></textarea>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-success font-weight-bold mt-2"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Packaging Details</h5>
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="pkgCartonSize">Carton Size</label>
+                                    <input type="text" id="pkgCartonSize" class="form-control"
+                                        placeholder="Enter Carton Size">
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="pkgQtyPerBox">Quantity Per Box</label>
+                                    <input type="number" id="pkgQtyPerBox" class="form-control"
+                                        placeholder="Enter Quantity Per Box">
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label" for="pkgExportDetails">Export Packaging Details</label>
+                                    <textarea id="pkgExportDetails" class="form-control" rows="2"
+                                        placeholder="Enter Export Packaging Details"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Manufacturer & Compliance -->
+                    <div class="form-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-building-shield card-icon"></i>
+                                <span>Manufacturer & Compliance</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <h5 class="mb-3 text-success font-weight-bold"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Manufacturer Details</h5>
+                            <div class="row mb-4">
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="mfgName">Manufacturer Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="mfgName" class="form-control"
+                                        placeholder="Enter Manufacturer Name" required>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="mfgCountry">Country of Origin</label>
+                                    <select id="mfgCountry" class="form-select">
+                                        <option value="" selected>Select Country</option>
+                                        <option value="India">India</option>
+                                        <option value="United States">United States</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="China">China</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="Switzerland">Switzerland</option>
+                                        <option value="Japan">Japan</option>
+                                        <option value="France">France</option>
+                                        <option value="Italy">Italy</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="mfgBrand">Brand Name</label>
+                                    <input type="text" id="mfgBrand" class="form-control"
+                                        placeholder="Enter Brand Name">
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-success font-weight-bold"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Regulatory Compliance</h5>
+                            <div class="regulatory-grid mb-2">
+                                <div class="regulatory-item" onclick="toggleRegulatory(this)">
+                                    <span class="regulatory-label">WHO-GMP</span>
+                                    <label class="custom-switch">
+                                        <input type="checkbox" value="WHO-GMP" onchange="preventCheckboxBubble(event)">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="regulatory-item" onclick="toggleRegulatory(this)">
+                                    <span class="regulatory-label">FDA Approved</span>
+                                    <label class="custom-switch">
+                                        <input type="checkbox" value="FDA Approved"
+                                            onchange="preventCheckboxBubble(event)">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="regulatory-item" onclick="toggleRegulatory(this)">
+                                    <span class="regulatory-label">ISO Certified</span>
+                                    <label class="custom-switch">
+                                        <input type="checkbox" value="ISO Certified"
+                                            onchange="preventCheckboxBubble(event)">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="regulatory-item" onclick="toggleRegulatory(this)">
+                                    <span class="regulatory-label">COA Available</span>
+                                    <label class="custom-switch">
+                                        <input type="checkbox" value="COA Available"
+                                            onchange="preventCheckboxBubble(event)">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="regulatory-item" onclick="toggleRegulatory(this)">
+                                    <span class="regulatory-label">MSDS Available</span>
+                                    <label class="custom-switch">
+                                        <input type="checkbox" value="MSDS Available"
+                                            onchange="preventCheckboxBubble(event)">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Applications & Indications -->
+                    <div class="form-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-notes-medical card-icon"></i>
+                                <span>Applications & Indications</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="mb-2">
+                                <label class="form-label" for="appIndications">Applications / Indications</label>
+                                <textarea id="appIndications" class="form-control" rows="4"
+                                    placeholder="Explain where this product is used and its applications"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Availability & Document Checklist -->
+                    <div class="form-card" id="documents-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-warehouse card-icon"></i>
+                                <span>Availability & Documents Checklist</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <h5 class="mb-3 text-success font-weight-bold"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Stock Availability</h5>
+                            <div class="row mb-4">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="availStockStatus">Stock Status <span
+                                            class="text-danger">*</span></label>
+                                    <select id="availStockStatus" class="form-select" required>
+                                        <option value="" disabled selected>Select status</option>
+                                        <option value="In Stock">In Stock</option>
+                                        <option value="Made To Order">Made To Order</option>
+                                        <option value="Out Of Stock">Out Of Stock</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="availMoq">Minimum Order Quantity (MOQ)</label>
+                                    <input type="number" id="availMoq" class="form-control" placeholder="Enter MOQ">
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-success font-weight-bold"
+                                style="font-size: 14px; border-left: 3px solid var(--accent-color); padding-left: 8px;">
+                                Documents Available</h5>
+                            <div class="document-grid mb-2">
+                                <label class="document-item">
+                                    <input type="checkbox" value="Product Brochure">
+                                    <span>Product Brochure</span>
+                                </label>
+                                <label class="document-item">
+                                    <input type="checkbox" value="COA (Certificate of Analysis)">
+                                    <span>COA (Certificate of Analysis)</span>
+                                </label>
+                                <label class="document-item">
+                                    <input type="checkbox" value="Product Datasheet">
+                                    <span>Product Datasheet</span>
+                                </label>
+                                <label class="document-item">
+                                    <input type="checkbox" value="GMP Certificate">
+                                    <span>GMP Certificate</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Dynamic APIs Card -->
+                    <div class="form-card border-highlight-api d-none" id="dynamic-api-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-flask card-icon text-info"></i>
+                                <span>API Information (Dynamic Section)</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiCasNumber">CAS Number</label>
+                                    <input type="text" id="apiCasNumber" class="form-control" placeholder="CAS Number">
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiFormula">Molecular Formula</label>
+                                    <input type="text" id="apiFormula" class="form-control"
+                                        placeholder="Molecular Formula">
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiWeight">Molecular Weight</label>
+                                    <input type="text" id="apiWeight" class="form-control"
+                                        placeholder="Molecular Weight">
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiStandard">Pharmacopoeia Standard</label>
+                                    <select id="apiStandard" class="form-select">
+                                        <option value="" selected>Select Standard</option>
+                                        <option value="USP">USP</option>
+                                        <option value="BP">BP</option>
+                                        <option value="EP">EP</option>
+                                        <option value="IP">IP</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiGrade">Grade</label>
+                                    <input type="text" id="apiGrade" class="form-control" placeholder="Grade">
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="apiPurity">Purity</label>
+                                    <input type="text" id="apiPurity" class="form-control" placeholder="Purity">
+                                </div>
+                                <div class="col-lg-4 mb-2">
+                                    <label class="form-label" for="apiShelfLife">Shelf Life</label>
+                                    <input type="text" id="apiShelfLife" class="form-control" placeholder="Shelf Life">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: Dynamic Surgical Supplies Card -->
+                    <div class="form-card border-highlight-surgical d-none" id="dynamic-surgical-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-kit-medical card-icon text-warning"></i>
+                                <span>Surgical Product Information (Dynamic Section)</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="surgMaterial">Material</label>
+                                    <input type="text" id="surgMaterial" class="form-control" placeholder="Material">
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="surgSterility">Sterility Status</label>
+                                    <select id="surgSterility" class="form-select">
+                                        <option value="" selected>Select Status</option>
+                                        <option value="Sterile">Sterile</option>
+                                        <option value="Non-Sterile">Non-Sterile</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="surgDisposable">Disposable / Reusable</label>
+                                    <select id="surgDisposable" class="form-select">
+                                        <option value="" selected>Select Option</option>
+                                        <option value="Disposable">Disposable</option>
+                                        <option value="Reusable">Reusable</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label" for="surgSize">Size Variants</label>
+                                    <input type="text" id="surgSize" class="form-control" placeholder="Size Variants">
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label" for="surgIntendedUse">Intended Use</label>
+                                    <textarea id="surgIntendedUse" class="form-control" rows="3"
+                                        placeholder="Intended Use"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 8: SEO Information & SKU -->
+                    <div class="form-card">
+                        <div class="form-card-header" onclick="toggleCard(this)">
+                            <div class="form-card-title">
+                                <i class="fa-solid fa-globe card-icon"></i>
+                                <span>SEO Information & Catalog Identifiers</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="prodSku">Product SKU <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="prodSku" class="form-control" placeholder="Enter Product SKU"
+                                        required>
+                                </div>
+                                <div class="col-lg-6 mb-3">
+                                    <label class="form-label" for="prodSlug">Product URL Slug <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" id="prodSlug" class="form-control"
+                                        placeholder="Enter Product URL Slug" required>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="seo-header">
+                                        <label class="form-label mb-0" for="seoMetaTitle">Meta Title <span
+                                                class="text-danger">*</span></label>
+                                        <span class="char-counter" id="titleCounter">0 / 60</span>
+                                    </div>
+                                    <input type="text" id="seoMetaTitle" class="form-control"
+                                        placeholder="Enter meta title" required oninput="updateSeoCounters()">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="seo-header">
+                                        <label class="form-label mb-0" for="seoMetaDesc">Meta Description <span
+                                                class="text-danger">*</span></label>
+                                        <span class="char-counter" id="descCounter">0 / 160</span>
+                                    </div>
+                                    <textarea id="seoMetaDesc" class="form-control" rows="3"
+                                        placeholder="Enter meta description" required
+                                        oninput="updateSeoCounters()"></textarea>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label" for="seoKeywordsInput">Product Keywords</label>
+                                    <div class="tags-input-wrapper" id="tagsContainer">
+                                        <input type="text" id="seoKeywordsInput" class="tags-input-field"
+                                            placeholder="Type keyword and press Enter or comma">
+                                    </div>
+                                    <div class="form-text">Press enter or type comma to separate multiple keywords.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FORM ACTIONS BAR -->
+                    <div class="form-actions-bar">
+                        <button type="button" class="btn-form-action btn-action-reset" onclick="resetProductForm()">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Form
+                        </button>
+                        <button type="button" class="btn-form-action btn-action-preview" onclick="previewProduct()">
+                            <i class="fa-solid fa-magnifying-glass"></i> Preview Product
+                        </button>
+                        <button type="submit" class="btn-form-action btn-action-save">
+                            <i class="fa-solid fa-floppy-disk"></i> Add Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="custom-toast-container" class="custom-toast-container"></div>
+
+    <!-- PRODUCT PREVIEW MODAL -->
+    <div id="product-preview-backdrop" class="admin-modal-backdrop" onclick="closePreviewModal()"></div>
+    <div id="product-preview-modal" class="admin-modal"
+        style="max-width: 800px; width: 90%; max-height: 90vh; display: none; overflow: hidden; flex-direction: column;">
+        <div class="d-flex justify-content-between align-items-center mb-3" style="padding: 20px 20px 0;">
+            <h3 class="modal-confirm-title text-start mb-0"><i
+                    class="fa-solid fa-file-prescription text-success me-2"></i>Product Catalog Sheet Preview</h3>
+            <button class="custom-toast-close" onclick="closePreviewModal()" style="font-size: 24px;">&times;</button>
+        </div>
+
+        <div class="preview-modal-body text-start" style="padding: 0 20px 20px; overflow-y: auto; flex-grow: 1;">
+            <div class="row">
+                <div class="col-md-4">
+                    <div id="prev-image-container" class="preview-image-container"></div>
+                </div>
+                <div class="col-md-8">
+                    <div class="preview-section-title">1. Core Details</div>
+                    <div class="preview-grid">
+                        <div class="preview-field">
+                            <span class="preview-field-label">Product Name</span>
+                            <span class="preview-field-value" id="prev-name"></span>
+                        </div>
+                        <div class="preview-field">
+                            <span class="preview-field-label">Category</span>
+                            <span class="preview-field-value" id="prev-category"></span>
+                        </div>
+                    </div>
+                    <div class="preview-field mb-3">
+                        <span class="preview-field-label">Description</span>
+                        <span class="preview-field-value text-muted" id="prev-desc"
+                            style="font-weight: normal; line-height: 1.4;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section-title">2. Technical Specifications</div>
+            <div class="preview-grid">
+                <div class="preview-field">
+                    <span class="preview-field-label">Strength</span>
+                    <span class="preview-field-value" id="prev-strength"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Dosage Form</span>
+                    <span class="preview-field-value" id="prev-dosage"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Packing</span>
+                    <span class="preview-field-value" id="prev-packing"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Shelf Life</span>
+                    <span class="preview-field-value" id="prev-shelf-life"></span>
+                </div>
+            </div>
+            <div class="preview-field mb-4">
+                <span class="preview-field-label">Storage Conditions</span>
+                <span class="preview-field-value" id="prev-storage"></span>
+            </div>
+
+            <div class="preview-section-title">3. Compliance & Manufacture</div>
+            <div class="preview-grid">
+                <div class="preview-field">
+                    <span class="preview-field-label">Manufacturer Name</span>
+                    <span class="preview-field-value" id="prev-mfg"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Country of Origin</span>
+                    <span class="preview-field-value" id="prev-country"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Brand Name</span>
+                    <span class="preview-field-value" id="prev-brand"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Regulatory Checklist</span>
+                    <span class="preview-field-value" id="prev-regulatory"></span>
+                </div>
+            </div>
+            <div class="preview-field mb-4">
+                <span class="preview-field-label">Applications & Indications</span>
+                <span class="preview-field-value" id="prev-applications"></span>
+            </div>
+
+            <div class="preview-section-title">4. Supply & Packaging</div>
+            <div class="preview-grid">
+                <div class="preview-field">
+                    <span class="preview-field-label">Carton Size</span>
+                    <span class="preview-field-value" id="prev-carton"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Qty per Box</span>
+                    <span class="preview-field-value" id="prev-qty"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Stock Status</span>
+                    <span class="preview-field-value" id="prev-stock"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Min Order Quantity</span>
+                    <span class="preview-field-value" id="prev-moq"></span>
+                </div>
+            </div>
+            <div class="preview-field mb-3">
+                <span class="preview-field-label">Export Packing Details</span>
+                <span class="preview-field-value" id="prev-export-pkg"></span>
+            </div>
+            <div class="preview-field mb-4">
+                <span class="preview-field-label">Document Availability Checklist</span>
+                <span class="preview-field-value" id="prev-documents"></span>
+            </div>
+
+            <!-- APIs Dynamic Preview Section -->
+            <div id="prev-section-api" class="d-none">
+                <div class="preview-section-title text-info">API Specification</div>
+                <div class="preview-grid">
+                    <div class="preview-field">
+                        <span class="preview-field-label">CAS Number</span>
+                        <span class="preview-field-value" id="prev-api-cas"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Molecular Formula</span>
+                        <span class="preview-field-value" id="prev-api-formula"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Molecular Weight</span>
+                        <span class="preview-field-value" id="prev-api-weight"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Pharmacopoeia Standard</span>
+                        <span class="preview-field-value" id="prev-api-standard"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Grade</span>
+                        <span class="preview-field-value" id="prev-api-grade"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Purity</span>
+                        <span class="preview-field-value" id="prev-api-purity"></span>
+                    </div>
+                    <div class="preview-field mb-4">
+                        <span class="preview-field-label">API Shelf Life</span>
+                        <span class="preview-field-value" id="prev-api-shelf"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Surgical Dynamic Preview Section -->
+            <div id="prev-section-surgical" class="d-none">
+                <div class="preview-section-title text-warning">Surgical Specification</div>
+                <div class="preview-grid">
+                    <div class="preview-field">
+                        <span class="preview-field-label">Material</span>
+                        <span class="preview-field-value" id="prev-surg-material"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Sterility Status</span>
+                        <span class="preview-field-value" id="prev-surg-sterility"></span>
+                    </div>
+                    <div class="preview-field">
+                        <span class="preview-field-label">Disposable / Reusable</span>
+                        <span class="preview-field-value" id="prev-surg-usage"></span>
+                    </div>
+                    <div class="preview-field mb-3">
+                        <span class="preview-field-label">Size Variants</span>
+                        <span class="preview-field-value" id="prev-surg-variants"></span>
+                    </div>
+                </div>
+                <div class="preview-field mb-4">
+                    <span class="preview-field-label">Intended Use</span>
+                    <span class="preview-field-value" id="prev-surg-use"></span>
+                </div>
+            </div>
+
+            <div class="preview-section-title">5. SEO Data</div>
+            <div class="preview-grid">
+                <div class="preview-field">
+                    <span class="preview-field-label">Product SKU</span>
+                    <span class="preview-field-value" id="prev-seo-sku"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">URL Slug</span>
+                    <span class="preview-field-value" id="prev-seo-slug"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Meta Title</span>
+                    <span class="preview-field-value" id="prev-seo-title"></span>
+                </div>
+                <div class="preview-field">
+                    <span class="preview-field-label">Product Keywords</span>
+                    <span class="preview-field-value" id="prev-seo-keywords"></span>
+                </div>
+            </div>
+            <div class="preview-field">
+                <span class="preview-field-label">Meta Description</span>
+                <span class="preview-field-value" id="prev-seo-desc"></span>
+            </div>
+        </div>
+
+        <div class="modal-confirm-actions mt-2" style="padding: 0 20px 20px;">
+            <button class="btn-modal-cancel w-100" onclick="closePreviewModal()">Close Preview</button>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="delete-confirm-backdrop" class="admin-modal-backdrop" onclick="closeDeleteModal()"></div>
+    <div id="delete-confirm-modal" class="admin-modal">
+        <div class="modal-confirm-icon">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <h3 class="modal-confirm-title">Are you sure?</h3>
+        <p class="modal-confirm-text">This action is permanent and will delete this submission from Firebase Realtime
+            Database immediately.</p>
+        <div class="modal-confirm-actions">
+            <button class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-modal-confirm" id="confirmDeleteBtn">Delete Permanently</button>
+        </div>
+    </div>
+
+    <!-- Firebase Compatibility SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+    <!-- ADMIN LOGIC SCRIPT -->
+    <script>
+        // Firebase Configuration (Matching main website setup)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJ1CqTaQEap8A4lLYCMVl4uDkT1JowfMA",
+            authDomain: "medraw-pharma.firebaseapp.com",
+            databaseURL: "https://medraw-pharma-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "medraw-pharma",
+            storageBucket: "medraw-pharma.firebasestorage.app",
+            messagingSenderId: "448438989887",
+            appId: "1:448438989887:web:6eb5cd0b52ceb594df348a",
+            measurementId: "G-CXMTC7TB85"
+        };
+
+        // Initialize Firebase
+        let db = null;
+        let auth = null;
+        let storage = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.database();
+            storage = firebase.storage();
+            window.db = db;
+            window.storage = storage;
+        } catch (err) {
+            console.error("Firebase Initialization Error: ", err);
+        }
+
+        // State variables
+        let currentTab = 'enquiries';
+        let rawEnquiries = [];
+        let rawContacts = [];
+        let rawQuotes = [];
+        let rawMyProducts = [];
+        let currentDeleteInfo = { uid: null, type: null };
+        let quoteDeleteInfo = { productUid: null, uid: null };
+
+        // DOM elements
+        const startupLoader = document.getElementById('startup-loader');
+        const loginContainer = document.getElementById('login-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+        const entriesCountLabel = document.getElementById('entries-count-label');
+        const adminSearchInput = document.getElementById('adminSearchInput');
+        const tableLoader = document.getElementById('table-loader');
+        const emptyState = document.getElementById('empty-state');
+
+        const enquiriesTableWrapper = document.getElementById('enquiries-table-wrapper');
+        const enquiriesTbody = document.getElementById('enquiries-tbody');
+
+        const quotesTableWrapper = document.getElementById('quotes-table-wrapper');
+        const quotesTbody = document.getElementById('quotes-tbody');
+
+        const contactTableWrapper = document.getElementById('contact-table-wrapper');
+        const contactsTbody = document.getElementById('contacts-tbody');
+
+        const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+        const deleteConfirmBackdrop = document.getElementById('delete-confirm-backdrop');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const userAvatarChar = document.getElementById('user-avatar-char');
+
+        // ────────────────────────────────────────────────
+        // AUTHENTICATION STATE WATCHER
+        // ────────────────────────────────────────────────
+        if (auth) {
+            auth.onAuthStateChanged(user => {
+                startupLoader.classList.add('d-none');
+
+                if (user) {
+                    // Update user profile display
+                    userEmailDisplay.textContent = user.email || 'admin@medraw.com';
+                    userAvatarChar.textContent = (user.email || 'A').charAt(0).toUpperCase();
+
+                    // Show dashboard, hide login
+                    loginContainer.classList.add('d-none');
+                    dashboardContainer.classList.remove('d-none');
+
+                    // Start listening to database nodes
+                    startRealtimeSync();
+                } else {
+                    // Stop database listeners
+                    stopRealtimeSync();
+
+                    // Show login, hide dashboard
+                    dashboardContainer.classList.add('d-none');
+                    loginContainer.classList.remove('d-none');
+                }
+            });
+        } else {
+            startupLoader.innerHTML = `<div class="text-danger text-center"><i class="fa-solid fa-triangle-exclamation fs-1 mb-2"></i><h4>Firebase Error</h4><p>Unable to load Firebase Auth SDK. Please refresh.</p></div>`;
+        }
+
+        // ────────────────────────────────────────────────
+        // LOGIN SUBMISSION HANDLER
+        // ────────────────────────────────────────────────
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Authenticating...';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    showToast('Access Granted', 'Signed in successfully!', 'success');
+                    loginForm.reset();
+                })
+                .catch(error => {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Log In <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+                    showToast('Security Block', error.message, 'error');
+                });
+        });
+
+        // ────────────────────────────────────────────────
+        // SIGN OUT HANDLER
+        // ────────────────────────────────────────────────
+        logoutBtn.addEventListener('click', function () {
+            auth.signOut()
+                .then(() => {
+                    showToast('Signed Out', 'You have securely signed out of the portal.', 'info');
+                })
+                .catch(error => {
+                    showToast('Sign Out Error', error.message, 'error');
+                });
+        });
+
+        // ────────────────────────────────────────────────
+        // DATABASE REALTIME SYNCHRONIZATION
+        // ────────────────────────────────────────────────
+        let enquiriesRef = null;
+        let contactsRef = null;
+        let quotesRef = null;
+        let myProductsRef = null;
+
+        function startRealtimeSync() {
+            tableLoader.classList.remove('d-none');
+            emptyState.classList.add('d-none');
+
+            // Listen to My Products
+            myProductsRef = db.ref('add-product');
+            myProductsRef.on('value', snapshot => {
+                rawMyProducts = [];
+                snapshot.forEach(childSnapshot => {
+                    const data = childSnapshot.val();
+                    rawMyProducts.push({
+                        uid: childSnapshot.key,
+                        ...data
+                    });
+                });
+
+                // Sort by date/timestamp descending
+                rawMyProducts.sort((a, b) => {
+                    const tA = a.timestamp || (a.date ? new Date(a.date + ' ' + (a.time || '00:00:00')).getTime() : 0);
+                    const tB = b.timestamp || (b.date ? new Date(b.date + ' ' + (b.time || '00:00:00')).getTime() : 0);
+                    return tB - tA;
+                });
+
+                if (currentTab === 'my-products') {
+                    renderData();
+                }
+            }, error => {
+                console.error("Firebase read blocked on add-product: ", error);
+            });
+
+            // Listen to Enquiries
+            enquiriesRef = db.ref('Enquire-data');
+            enquiriesRef.on('value', snapshot => {
+                rawEnquiries = [];
+                snapshot.forEach(childSnapshot => {
+                    const data = childSnapshot.val();
+                    rawEnquiries.push({
+                        uid: childSnapshot.key,
+                        ...data
+                    });
+                });
+
+                // Sort by date/timestamp descending
+                rawEnquiries.sort((a, b) => {
+                    const tA = a.timestamp || (a.date ? new Date(a.date + ' ' + (a.time || '00:00:00')).getTime() : 0);
+                    const tB = b.timestamp || (b.date ? new Date(b.date + ' ' + (b.time || '00:00:00')).getTime() : 0);
+                    return tB - tA;
+                });
+
+                if (currentTab === 'enquiries') {
+                    renderData();
+                }
+            }, error => {
+                console.error("Firebase read blocked on Enquire-data: ", error);
+                showToast('Database Error', 'Read access blocked. Please check Firebase rules: ' + error.message, 'error');
+            });
+
+            // Listen to Quotes
+            quotesRef = db.ref('request-a-quote');
+            quotesRef.on('value', snapshot => {
+                rawQuotes = [];
+                snapshot.forEach(productSnapshot => {
+                    productSnapshot.forEach(quoteSnapshot => {
+                        const data = quoteSnapshot.val();
+                        rawQuotes.push({
+                            uid: quoteSnapshot.key,
+                            productUid: productSnapshot.key,
+                            ...data
+                        });
+                    });
+                });
+
+                // Sort by date/timestamp descending
+                rawQuotes.sort((a, b) => {
+                    const tA = a.timestamp || (a.date ? new Date(a.date + ' ' + (a.time || '00:00:00')).getTime() : 0);
+                    const tB = b.timestamp || (b.date ? new Date(b.date + ' ' + (b.time || '00:00:00')).getTime() : 0);
+                    return tB - tA;
+                });
+
+                if (currentTab === 'quotes') {
+                    renderData();
+                }
+            }, error => {
+                console.error("Firebase read blocked on request-a-quote: ", error);
+            });
+
+            // Listen to Contacts
+            contactsRef = db.ref('Contact-data');
+            contactsRef.on('value', snapshot => {
+                rawContacts = [];
+                snapshot.forEach(childSnapshot => {
+                    const data = childSnapshot.val();
+                    rawContacts.push({
+                        uid: childSnapshot.key,
+                        ...data
+                    });
+                });
+
+                // Sort by date/timestamp descending
+                rawContacts.sort((a, b) => {
+                    const tA = a.timestamp || (a.date ? new Date(a.date + ' ' + (a.time || '00:00:00')).getTime() : 0);
+                    const tB = b.timestamp || (b.date ? new Date(b.date + ' ' + (b.time || '00:00:00')).getTime() : 0);
+                    return tB - tA;
+                });
+
+                if (currentTab === 'contacts') {
+                    renderData();
+                }
+            }, error => {
+                console.error("Firebase read blocked on Contact-data: ", error);
+            });
+        }
+
+        function stopRealtimeSync() {
+            if (enquiriesRef) {
+                enquiriesRef.off();
+            }
+            if (contactsRef) {
+                contactsRef.off();
+            }
+            if (quotesRef) {
+                quotesRef.off();
+            }
+            if (myProductsRef) {
+                myProductsRef.off();
+            }
+            rawEnquiries = [];
+            rawContacts = [];
+            rawQuotes = [];
+            rawMyProducts = [];
+        }
+
+        // ────────────────────────────────────────────────
+        // RENDERING LOGIC
+        // ────────────────────────────────────────────────
+        function renderData() {
+            tableLoader.classList.add('d-none');
+            const query = adminSearchInput.value.toLowerCase().trim();
+
+            if (currentTab === 'enquiries') {
+                enquiriesTableWrapper.classList.remove('d-none');
+                quotesTableWrapper.classList.add('d-none');
+                contactTableWrapper.classList.add('d-none');
+                enquiriesTbody.innerHTML = '';
+
+                // Filter
+                const filtered = rawEnquiries.filter(item => {
+                    return (
+                        (item.name && item.name.toLowerCase().includes(query)) ||
+                        (item.email && item.email.toLowerCase().includes(query)) ||
+                        (item.phone && item.phone.toLowerCase().includes(query)) ||
+                        (item.product && item.product.toLowerCase().includes(query)) ||
+                        (item.requirement && item.requirement.toLowerCase().includes(query)) ||
+                        (item.date && item.date.toLowerCase().includes(query))
+                    );
+                });
+
+                entriesCountLabel.textContent = `Total: ${filtered.length} Enquiries`;
+
+                if (filtered.length === 0) {
+                    emptyState.classList.remove('d-none');
+                    enquiriesTableWrapper.classList.add('d-none');
+                } else {
+                    emptyState.classList.add('d-none');
+                    enquiriesTableWrapper.classList.remove('d-none');
+
+                    filtered.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const displayDate = item.date || 'N/A';
+                        const displayTime = item.time || '';
+
+                        tr.innerHTML = `
+                            <td class="data-date-time">
+                                <div class="fw-bold">${displayDate}</div>
+                                <div>${displayTime}</div>
+                            </td>
+                            <td class="data-name">${escapeHTML(item.name || 'Anonymous')}</td>
+                            <td><a href="mailto:${escapeHTML(item.email || '')}" class="text-decoration-none text-success">${escapeHTML(item.email || 'N/A')}</a></td>
+                            <td><a href="tel:${escapeHTML(item.phone || '')}" class="text-decoration-none text-secondary">${escapeHTML(item.phone || 'N/A')}</a></td>
+                            <td><span class="data-badge product-badge">${escapeHTML(item.product || 'Orphan/Specialty')}</span></td>
+                            <td>
+                                <div class="data-message-cell">${escapeHTML(item.requirement || '')}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <button class="btn-action-delete" onclick="promptDelete('${item.uid}', 'enquiries')" title="Delete entry">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        `;
+                        enquiriesTbody.appendChild(tr);
+                    });
+                }
+            } else if (currentTab === 'quotes') {
+                enquiriesTableWrapper.classList.add('d-none');
+                quotesTableWrapper.classList.remove('d-none');
+                contactTableWrapper.classList.add('d-none');
+                quotesTbody.innerHTML = '';
+
+                // Filter
+                const filtered = rawQuotes.filter(item => {
+                    return (
+                        (item.firstName && item.firstName.toLowerCase().includes(query)) ||
+                        (item.lastName && item.lastName.toLowerCase().includes(query)) ||
+                        (item.name && item.name.toLowerCase().includes(query)) ||
+                        (item.email && item.email.toLowerCase().includes(query)) ||
+                        (item.phone && item.phone.toLowerCase().includes(query)) ||
+                        (item.productName && item.productName.toLowerCase().includes(query)) ||
+                        (item.deliveryCountry && item.deliveryCountry.toLowerCase().includes(query)) ||
+                        (item.profile && item.profile.toLowerCase().includes(query)) ||
+                        (item.date && item.date.toLowerCase().includes(query))
+                    );
+                });
+
+                entriesCountLabel.textContent = `Total: ${filtered.length} Quote Requests`;
+
+                if (filtered.length === 0) {
+                    emptyState.classList.remove('d-none');
+                    quotesTableWrapper.classList.add('d-none');
+                } else {
+                    emptyState.classList.add('d-none');
+                    quotesTableWrapper.classList.remove('d-none');
+
+                    filtered.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const displayDate = item.date || 'N/A';
+                        const displayTime = item.time || '';
+                        const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.name || 'Anonymous';
+
+                        tr.innerHTML = `
+                            <td class="data-date-time">
+                                <div class="fw-bold">${displayDate}</div>
+                                <div>${displayTime}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold">${escapeHTML(item.productName || 'Unknown Product')}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success py-1 px-2 text-white">${escapeHTML(String(item.quantity || 1))} Pack(s)</span>
+                            </td>
+                            <td class="data-name">${escapeHTML(fullName)}</td>
+                            <td><span class="data-badge reason-badge" style="background:#eef2ff; color:#4f46e5; border-color:#c7d2fe;">${escapeHTML(item.profile || 'General')}</span></td>
+                            <td>
+                                <div><a href="mailto:${escapeHTML(item.email || '')}" class="text-decoration-none text-success"><i class="fa-solid fa-envelope me-1"></i>${escapeHTML(item.email || 'N/A')}</a></div>
+                                <div class="mt-1"><a href="tel:${escapeHTML(item.phone || '')}" class="text-decoration-none text-secondary"><i class="fa-solid fa-phone me-1"></i>${escapeHTML(item.phone || 'N/A')}</a></div>
+                            </td>
+                            <td>
+                                <div class="fw-bold">${escapeHTML(item.deliveryCountry || 'N/A')}</div>
+                                <div class="text-muted" style="font-size: 11px;">Zip: ${escapeHTML(item.deliveryPostcode || 'N/A')}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <button class="btn-action-delete" onclick="promptDeleteQuote('${item.productUid}', '${item.uid}')" title="Delete entry">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        `;
+                        quotesTbody.appendChild(tr);
+                    });
+                }
+            } else if (currentTab === 'contacts') {
+                enquiriesTableWrapper.classList.add('d-none');
+                quotesTableWrapper.classList.add('d-none');
+                const myProductsTableWrapper = document.getElementById('my-products-table-wrapper');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.add('d-none');
+                contactTableWrapper.classList.remove('d-none');
+                contactsTbody.innerHTML = '';
+
+                // Filter
+                const filtered = rawContacts.filter(item => {
+                    return (
+                        (item.name && item.name.toLowerCase().includes(query)) ||
+                        (item.email && item.email.toLowerCase().includes(query)) ||
+                        (item.phone && item.phone.toLowerCase().includes(query)) ||
+                        (item.reason && item.reason.toLowerCase().includes(query)) ||
+                        (item.message && item.message.toLowerCase().includes(query)) ||
+                        (item.date && item.date.toLowerCase().includes(query))
+                    );
+                });
+
+                entriesCountLabel.textContent = `Total: ${filtered.length} Contacts`;
+
+                if (filtered.length === 0) {
+                    emptyState.classList.remove('d-none');
+                    contactTableWrapper.classList.add('d-none');
+                } else {
+                    emptyState.classList.add('d-none');
+                    contactTableWrapper.classList.remove('d-none');
+
+                    filtered.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const displayDate = item.date || 'N/A';
+                        const displayTime = item.time || '';
+
+                        tr.innerHTML = `
+                            <td class="data-date-time">
+                                <div class="fw-bold">${displayDate}</div>
+                                <div>${displayTime}</div>
+                            </td>
+                            <td class="data-name">${escapeHTML(item.name || 'Anonymous')}</td>
+                            <td><span class="data-badge reason-badge">${escapeHTML(item.reason || 'General Contact')}</span></td>
+                            <td><a href="mailto:${escapeHTML(item.email || '')}" class="text-decoration-none text-success">${escapeHTML(item.email || 'N/A')}</a></td>
+                            <td><a href="tel:${escapeHTML(item.phone || '')}" class="text-decoration-none text-secondary">${escapeHTML(item.phone || 'N/A')}</a></td>
+                            <td>
+                                <div class="data-message-cell">${escapeHTML(item.message || '')}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                <button class="btn-action-delete" onclick="promptDelete('${item.uid}', 'contacts')" title="Delete entry">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        `;
+                        contactsTbody.appendChild(tr);
+                    });
+                }
+            } else if (currentTab === 'my-products') {
+                enquiriesTableWrapper.classList.add('d-none');
+                quotesTableWrapper.classList.add('d-none');
+                contactTableWrapper.classList.add('d-none');
+
+                const myProductsTbody = document.getElementById('my-products-tbody');
+                const myProductsTableWrapper = document.getElementById('my-products-table-wrapper');
+
+                myProductsTbody.innerHTML = '';
+                myProductsTableWrapper.classList.remove('d-none');
+
+                // Filter
+                const filtered = rawMyProducts.filter(item => {
+                    const basic = item['basic-information'] || {};
+                    return (
+                        (basic.productName && basic.productName.toLowerCase().includes(query)) ||
+                        (basic.productCategory && basic.productCategory.toLowerCase().includes(query)) ||
+                        (item.date && item.date.toLowerCase().includes(query))
+                    );
+                });
+
+                entriesCountLabel.textContent = `Total: ${filtered.length} Products`;
+
+                if (filtered.length === 0) {
+                    emptyState.classList.remove('d-none');
+                    myProductsTableWrapper.classList.add('d-none');
+                } else {
+                    emptyState.classList.add('d-none');
+                    myProductsTableWrapper.classList.remove('d-none');
+
+                    filtered.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const basic = item['basic-information'] || {};
+                        const displayDate = item.date || 'N/A';
+                        const displayTime = item.time || '';
+
+                        let categoryText = basic.productCategory || 'N/A';
+                        if (categoryText === 'pharmaceuticals') categoryText = 'Pharmaceuticals';
+                        else if (categoryText === 'apis-bulk') categoryText = 'APIs & Bulk Drugs';
+                        else if (categoryText === 'surgical-supplies') categoryText = 'Surgical Supplies';
+                        else if (categoryText === 'medical-devices') categoryText = 'Medical Devices';
+                        else if (categoryText === 'lab-equipment') categoryText = 'Laboratory Equipment';
+
+                        tr.innerHTML = `
+                            <td>
+                                <div class="fw-bold text-success">${escapeHTML(basic.productName || 'Unnamed')}</div>
+                            </td>
+                            <td>
+                                <span class="data-badge product-badge">${escapeHTML(categoryText)}</span>
+                            </td>
+                            <td class="data-date-time">
+                                <div class="fw-bold">${displayDate}</div>
+                                <div>${displayTime}</div>
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <button class="btn-crud-action btn-crud-view" onclick="viewProductDetails('${item.uid}')" title="View details">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </button>
+                                    <button class="btn-crud-action btn-crud-edit" onclick="editProduct('${item.uid}')" title="Edit product">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+                                    <button class="btn-crud-action btn-crud-delete" onclick="promptDelete('${item.uid}', 'my-products')" title="Delete product">
+                                        <i class="fa-solid fa-trash-can"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        myProductsTbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        // TAB NAVIGATION SWITCHER
+        // ────────────────────────────────────────────────
+        function switchTab(tab) {
+            if (currentTab === tab) return;
+            currentTab = tab;
+
+            // Close sidebar on tablet/mobile if open
+            const sidebar = document.getElementById('adminSidebar');
+            if (sidebar && sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+
+            // Adjust sidebar navigation highlighting
+            document.getElementById('nav-enquiries').classList.remove('active');
+            const navQuotes = document.getElementById('nav-quotes');
+            if (navQuotes) navQuotes.classList.remove('active');
+            document.getElementById('nav-contacts').classList.remove('active');
+            const navAddProduct = document.getElementById('nav-add-product');
+            if (navAddProduct) navAddProduct.classList.remove('active');
+            const navMyProducts = document.getElementById('nav-my-products');
+            if (navMyProducts) navMyProducts.classList.remove('active');
+
+            const addProductWrapper = document.getElementById('add-product-wrapper');
+            const controlsBar = document.querySelector('.controls-bar');
+            const tableCard = document.querySelector('.table-card');
+
+            const enquiriesTableWrapper = document.getElementById('enquiries-table-wrapper');
+            const contactTableWrapper = document.getElementById('contact-table-wrapper');
+            const quotesTableWrapper = document.getElementById('quotes-table-wrapper');
+            const myProductsTableWrapper = document.getElementById('my-products-table-wrapper');
+
+            if (tab === 'enquiries') {
+                document.getElementById('nav-enquiries').classList.add('active');
+                pageTitle.textContent = "Product Enquiries";
+                pageSubtitle.textContent = "Manage and track submissions from the quick enquiry form";
+
+                if (controlsBar) controlsBar.classList.remove('d-none');
+                if (tableCard) tableCard.classList.remove('d-none');
+                if (addProductWrapper) addProductWrapper.classList.add('d-none');
+                if (quotesTableWrapper) quotesTableWrapper.classList.add('d-none');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.add('d-none');
+
+                // Reset search input
+                adminSearchInput.value = '';
+                // Re-render
+                renderData();
+            } else if (tab === 'quotes') {
+                if (navQuotes) navQuotes.classList.add('active');
+                pageTitle.textContent = "Quote Requests";
+                pageSubtitle.textContent = "Manage product price inquiries submitted by hospitals and distributors";
+
+                if (controlsBar) controlsBar.classList.remove('d-none');
+                if (tableCard) tableCard.classList.remove('d-none');
+                if (addProductWrapper) addProductWrapper.classList.add('d-none');
+                if (quotesTableWrapper) quotesTableWrapper.classList.remove('d-none');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.add('d-none');
+
+                adminSearchInput.value = '';
+                renderData();
+            } else if (tab === 'contacts') {
+                document.getElementById('nav-contacts').classList.add('active');
+                pageTitle.textContent = "Contact Messages";
+                pageSubtitle.textContent = "Manage submissions from the general Contact Us section";
+
+                if (controlsBar) controlsBar.classList.remove('d-none');
+                if (tableCard) tableCard.classList.remove('d-none');
+                if (addProductWrapper) addProductWrapper.classList.add('d-none');
+                if (quotesTableWrapper) quotesTableWrapper.classList.add('d-none');
+                if (enquiriesTableWrapper) enquiriesTableWrapper.classList.add('d-none');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.add('d-none');
+                if (contactTableWrapper) contactTableWrapper.classList.remove('d-none');
+
+                // Reset search input
+                adminSearchInput.value = '';
+                // Re-render
+                renderData();
+            } else if (tab === 'add-product') {
+                if (navAddProduct) navAddProduct.classList.add('active');
+                pageTitle.textContent = window.editingProductId ? "Edit Product" : "Add New Product";
+                pageSubtitle.textContent = window.editingProductId ? "Modify product parameters and save changes" : "Create a new product listing in the catalog";
+
+                if (controlsBar) controlsBar.classList.add('d-none');
+                if (tableCard) tableCard.classList.add('d-none');
+                if (addProductWrapper) addProductWrapper.classList.remove('d-none');
+                if (quotesTableWrapper) quotesTableWrapper.classList.add('d-none');
+                if (enquiriesTableWrapper) enquiriesTableWrapper.classList.add('d-none');
+                if (contactTableWrapper) contactTableWrapper.classList.add('d-none');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.add('d-none');
+            } else if (tab === 'my-products') {
+                if (navMyProducts) navMyProducts.classList.add('active');
+                pageTitle.textContent = "My Products";
+                pageSubtitle.textContent = "View, edit, and delete products in your Firebase catalog";
+
+                if (controlsBar) controlsBar.classList.remove('d-none');
+                if (tableCard) tableCard.classList.remove('d-none');
+                if (addProductWrapper) addProductWrapper.classList.add('d-none');
+                if (quotesTableWrapper) quotesTableWrapper.classList.add('d-none');
+                if (enquiriesTableWrapper) enquiriesTableWrapper.classList.add('d-none');
+                if (contactTableWrapper) contactTableWrapper.classList.add('d-none');
+                if (myProductsTableWrapper) myProductsTableWrapper.classList.remove('d-none');
+
+                adminSearchInput.value = '';
+                renderData();
+            }
+        }
+
+        // Search trigger
+        adminSearchInput.addEventListener('input', renderData);
+
+        // ────────────────────────────────────────────────
+        // ROW DELETION PROCESS
+        // ────────────────────────────────────────────────
+        function promptDelete(uid, type) {
+            currentDeleteInfo = { uid, type };
+            deleteConfirmModal.classList.add('show');
+            deleteConfirmBackdrop.classList.add('show');
+        }
+
+        function promptDeleteQuote(productUid, uid) {
+            quoteDeleteInfo = { productUid, uid };
+            deleteConfirmModal.classList.add('show');
+            deleteConfirmBackdrop.classList.add('show');
+            currentDeleteInfo = { uid: 'quote_placeholder', type: 'quotes' };
+        }
+
+        function closeDeleteModal() {
+            deleteConfirmModal.classList.remove('show');
+            deleteConfirmBackdrop.classList.remove('show');
+            currentDeleteInfo = { uid: null, type: null };
+            quoteDeleteInfo = { productUid: null, uid: null };
+        }
+
+        confirmDeleteBtn.addEventListener('click', function () {
+            const { uid, type } = currentDeleteInfo;
+            if (!uid || !type) return;
+
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Deleting...';
+
+            if (type === 'quotes') {
+                const { productUid, uid: quoteUid } = quoteDeleteInfo;
+                db.ref('request-a-quote/' + productUid + '/' + quoteUid).remove()
+                    .then(() => {
+                        showToast('Record Deleted', 'Quote request deleted from database.', 'success');
+                        closeDeleteModal();
+                    })
+                    .catch(error => {
+                        showToast('Deletion Failed', error.message, 'error');
+                    })
+                    .finally(() => {
+                        confirmDeleteBtn.disabled = false;
+                        confirmDeleteBtn.innerText = 'Delete Permanently';
+                    });
+            } else {
+                let nodePath = '';
+                if (type === 'enquiries') nodePath = 'Enquire-data';
+                else if (type === 'contacts') nodePath = 'Contact-data';
+                else if (type === 'my-products') nodePath = 'add-product';
+
+                db.ref(nodePath + '/' + uid).remove()
+                    .then(() => {
+                        const msg = type === 'my-products' ? 'Product deleted from catalog database.' : 'Submission deleted from database.';
+                        showToast('Record Deleted', msg, 'success');
+                        closeDeleteModal();
+                    })
+                    .catch(error => {
+                        showToast('Deletion Failed', error.message, 'error');
+                    })
+                    .finally(() => {
+                        confirmDeleteBtn.disabled = false;
+                        confirmDeleteBtn.innerText = 'Delete Permanently';
+                    });
+            }
+        });
+
+        // ────────────────────────────────────────────────
+        // TOAST NOTIFICATION SYSTEM
+        // ────────────────────────────────────────────────
+        function showToast(title, message, type = 'success') {
+            let container = document.getElementById('custom-toast-container');
+
+            const toast = document.createElement('div');
+            toast.className = `custom-toast custom-toast-${type}`;
+
+            const iconHtml = type === 'success' ? '<i class="fa-solid fa-circle-check"></i>' :
+                type === 'error' ? '<i class="fa-solid fa-circle-xmark"></i>' :
+                    '<i class="fa-solid fa-circle-info"></i>';
+
+            toast.innerHTML = `
+                <div class="custom-toast-icon">${iconHtml}</div>
+                <div class="custom-toast-content">
+                    <h4 class="custom-toast-title">${title}</h4>
+                    <p class="custom-toast-msg">${message}</p>
+                </div>
+                <button class="custom-toast-close">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show-toast');
+            }, 50);
+
+            const autoDismiss = setTimeout(() => {
+                closeToast(toast);
+            }, 5000);
+
+            toast.querySelector('.custom-toast-close').addEventListener('click', () => {
+                clearTimeout(autoDismiss);
+                closeToast(toast);
+            });
+        }
+
+        function closeToast(toast) {
+            toast.classList.remove('show-toast');
+            setTimeout(() => {
+                toast.remove();
+            }, 400);
+        }
+
+        // Helper to prevent HTML injections
+        function escapeHTML(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Toggle Sidebar Helper for Responsive design
+        window.toggleSidebar = function() {
+            const isMobile = window.innerWidth <= 991;
+            if (isMobile) {
+                const sidebar = document.getElementById('adminSidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar) sidebar.classList.toggle('open');
+                if (backdrop) backdrop.classList.toggle('d-none');
+            } else {
+                document.body.classList.toggle('sidebar-collapsed');
+            }
+        };
+
+        // ────────────────────────────────────────────────
+        // MY PRODUCTS ACTION BUTTONS (VIEW / EDIT / CRUD)
+        // ────────────────────────────────────────────────
+        window.viewProductDetails = function(productId) {
+            const matched = rawMyProducts.find(p => p.uid === productId);
+            if (!matched) return;
+
+            const basic = matched['basic-information'] || {};
+            const specs = matched['specifications'] || {};
+            const mfg = matched['manufacturer'] || {};
+            const regulatory = matched['regulatory-compliance'] || {};
+            const docs = matched['documents-available'] || {};
+            const packaging = matched['packaging'] || {};
+            const availability = matched['availability'] || {};
+            const app = matched['applications-indications'] || {};
+            const seo = matched['seo-catalog'] || {};
+
+            // Basic details
+            document.getElementById('prev-name').textContent = basic.productName || 'Unnamed';
+            document.getElementById('prev-category').textContent = basic.productCategory || 'N/A';
+            document.getElementById('prev-desc').textContent = basic.productDescription || 'No description';
+
+            // Specifications
+            setPrevElementValue('prev-strength', specs.strength);
+            setPrevElementValue('prev-dosage', specs.dosageForm);
+            setPrevElementValue('prev-packing', specs.packing);
+            setPrevElementValue('prev-shelf-life', specs.shelfLife);
+            setPrevElementValue('prev-storage', specs.storageConditions);
+
+            // Manufacturer
+            setPrevElementValue('prev-mfg', mfg.manufacturerName);
+            setPrevElementValue('prev-country', mfg.countryOfOrigin);
+            setPrevElementValue('prev-brand', mfg.brandName);
+
+            // Regulatory Checklist
+            const regList = [];
+            for (const [key, val] of Object.entries(regulatory)) {
+                if (val) regList.push(key);
+            }
+            document.getElementById('prev-regulatory').textContent = regList.length > 0 ? regList.join(', ') : 'None selected';
+
+            // Applications
+            setPrevElementValue('prev-applications', app.applicationsIndications);
+
+            // Packaging
+            setPrevElementValue('prev-carton', packaging.cartonSize);
+            setPrevElementValue('prev-qty', packaging.quantityPerBox);
+            setPrevElementValue('prev-export-pkg', packaging.exportPackagingDetails);
+
+            // Availability
+            document.getElementById('prev-stock').textContent = availability.stockStatus || 'Not selected';
+            setPrevElementValue('prev-moq', availability.minimumOrderQuantity);
+
+            // Documents
+            const docList = [];
+            for (const [key, val] of Object.entries(docs)) {
+                if (val) docList.push(key);
+            }
+            document.getElementById('prev-documents').textContent = docList.length > 0 ? docList.join(', ') : 'None selected';
+
+            // Dynamic fields preview (API / Surgical)
+            const apiPreviewSection = document.getElementById('prev-section-api');
+            const surgPreviewSection = document.getElementById('prev-section-surgical');
+            if (apiPreviewSection) apiPreviewSection.classList.add('d-none');
+            if (surgPreviewSection) surgPreviewSection.classList.add('d-none');
+
+            if (basic.productCategory === 'apis-bulk' && matched['api-information']) {
+                if (apiPreviewSection) {
+                    apiPreviewSection.classList.remove('d-none');
+                    const api = matched['api-information'];
+                    setPrevElementValue('prev-api-cas', api.casNumber);
+                    setPrevElementValue('prev-api-formula', api.molecularFormula);
+                    setPrevElementValue('prev-api-weight', api.molecularWeight);
+                    setPrevElementValue('prev-api-standard', api.pharmacopoeiaStandard);
+                    setPrevElementValue('prev-api-grade', api.grade);
+                    setPrevElementValue('prev-api-purity', api.purity);
+                    setPrevElementValue('prev-api-shelf', api.apiShelfLife);
+                }
+            } else if (basic.productCategory === 'surgical-supplies' && matched['surgical-information']) {
+                if (surgPreviewSection) {
+                    surgPreviewSection.classList.remove('d-none');
+                    const surg = matched['surgical-information'];
+                    setPrevElementValue('prev-surg-material', surg.material);
+                    setPrevElementValue('prev-surg-sterility', surg.sterilityStatus);
+                    setPrevElementValue('prev-surg-usage', surg.disposableReusable);
+                    setPrevElementValue('prev-surg-variants', surg.sizeVariants);
+                    setPrevElementValue('prev-surg-use', surg.intendedUse);
+                }
+            }
+
+            // SEO
+            setPrevElementValue('prev-seo-title', seo.metaTitle);
+            setPrevElementValue('prev-seo-desc', seo.metaDescription);
+            document.getElementById('prev-seo-keywords').textContent = (seo.productKeywords && seo.productKeywords.length > 0) ? seo.productKeywords.join(', ') : 'None added';
+            setPrevElementValue('prev-seo-sku', seo.productSku);
+            setPrevElementValue('prev-seo-slug', seo.productUrlSlug);
+
+            // Preview image
+            const prevImageContainer = document.getElementById('prev-image-container');
+            if (prevImageContainer) {
+                prevImageContainer.innerHTML = '';
+                if (basic.productImageUrl) {
+                    const img = document.createElement('img');
+                    img.src = basic.productImageUrl;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '200px';
+                    img.style.objectFit = 'contain';
+                    img.style.display = 'block';
+                    prevImageContainer.appendChild(img);
+                } else {
+                    prevImageContainer.innerHTML = '<span class="text-muted">No product image uploaded</span>';
+                }
+            }
+
+            // Open modal
+            const modal = document.getElementById('product-preview-modal');
+            if (modal) {
+                modal.style.setProperty('display', 'flex', 'important');
+                modal.classList.add('show');
+            }
+            const backdrop = document.getElementById('product-preview-backdrop');
+            if (backdrop) {
+                backdrop.classList.add('show');
+            }
+        };
+
+        window.editProduct = function(productId) {
+            const matched = rawMyProducts.find(p => p.uid === productId);
+            if (!matched) return;
+
+            // Set editing ID
+            window.editingProductId = productId;
+
+            const basic = matched['basic-information'] || {};
+            const specs = matched['specifications'] || {};
+            const mfg = matched['manufacturer'] || {};
+            const regulatory = matched['regulatory-compliance'] || {};
+            const docs = matched['documents-available'] || {};
+            const packaging = matched['packaging'] || {};
+            const availability = matched['availability'] || {};
+            const app = matched['applications-indications'] || {};
+            const seo = matched['seo-catalog'] || {};
+
+            // 1. Basic Details
+            document.getElementById('prodName').value = basic.productName || '';
+            document.getElementById('prodCategory').value = basic.productCategory || '';
+            document.getElementById('prodDesc').value = basic.productDescription || '';
+
+            // Trigger category change to display API or surgical fields if needed
+            if (typeof handleCategoryChange === 'function') {
+                handleCategoryChange();
+            }
+
+            // Image Preview in dropzone
+            if (typeof resetImageUpload === 'function') {
+                resetImageUpload();
+            }
+            if (basic.productImageUrl) {
+                const previewOverlay = document.getElementById('imagePreviewOverlay');
+                const previewImg = document.getElementById('imagePreviewImg');
+                if (previewImg && previewOverlay) {
+                    previewImg.src = basic.productImageUrl;
+                    previewOverlay.classList.remove('d-none');
+                }
+            }
+
+            // 2. Specifications
+            document.getElementById('specStrength').value = specs.strength || '';
+            document.getElementById('specDosage').value = specs.dosageForm || '';
+            document.getElementById('specPacking').value = specs.packing || '';
+            document.getElementById('specShelfLife').value = specs.shelfLife || '';
+            document.getElementById('specStorage').value = specs.storageConditions || '';
+
+            // 3. Manufacturer Details
+            document.getElementById('mfgName').value = mfg.manufacturerName || '';
+            document.getElementById('mfgCountry').value = mfg.countryOfOrigin || '';
+            document.getElementById('mfgBrand').value = mfg.brandName || '';
+
+            // 4. Regulatory Checkboxes
+            document.querySelectorAll('.regulatory-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = !!regulatory[cb.value];
+                const label = cb.closest('.regulatory-item');
+                if (label) {
+                    if (cb.checked) label.classList.add('active');
+                    else label.classList.remove('active');
+                }
+            });
+
+            // 5. Applications & Indications
+            document.getElementById('appIndications').value = app.applicationsIndications || '';
+
+            // 6. Packaging Details
+            document.getElementById('pkgCartonSize').value = packaging.cartonSize || '';
+            document.getElementById('pkgQtyPerBox').value = packaging.quantityPerBox || '';
+            document.getElementById('pkgExportDetails').value = packaging.exportPackagingDetails || '';
+
+            // 7. Availability
+            document.getElementById('availStockStatus').value = availability.stockStatus || '';
+            document.getElementById('availMoq').value = availability.minimumOrderQuantity || '';
+
+            // 8. Available Documents Checkboxes
+            document.querySelectorAll('#documents-card input[type="checkbox"]').forEach(cb => {
+                cb.checked = !!docs[cb.value];
+            });
+
+            // 9. API / Surgical Information
+            if (basic.productCategory === 'apis-bulk' && matched['api-information']) {
+                const api = matched['api-information'];
+                document.getElementById('apiCasNumber').value = api.casNumber || '';
+                document.getElementById('apiFormula').value = api.molecularFormula || '';
+                document.getElementById('apiWeight').value = api.molecularWeight || '';
+                document.getElementById('apiStandard').value = api.pharmacopoeiaStandard || '';
+                document.getElementById('apiGrade').value = api.grade || '';
+                document.getElementById('apiPurity').value = api.purity || '';
+                document.getElementById('apiShelfLife').value = api.apiShelfLife || '';
+            } else if (basic.productCategory === 'surgical-supplies' && matched['surgical-information']) {
+                const surg = matched['surgical-information'];
+                document.getElementById('surgMaterial').value = surg.material || '';
+                document.getElementById('surgSterility').value = surg.sterilityStatus || '';
+                document.getElementById('surgDisposable').value = surg.disposableReusable || '';
+                document.getElementById('surgSize').value = surg.sizeVariants || '';
+                document.getElementById('surgIntendedUse').value = surg.intendedUse || '';
+            }
+
+            // 10. SEO Metadata
+            document.getElementById('prodSku').value = seo.productSku || '';
+            document.getElementById('prodSlug').value = seo.productUrlSlug || '';
+            document.getElementById('seoMetaTitle').value = seo.metaTitle || '';
+            document.getElementById('seoMetaDesc').value = seo.metaDescription || '';
+            
+            // Keywords
+            window.productKeywords = seo.productKeywords || [];
+            if (typeof renderTags === 'function') {
+                renderTags();
+            }
+
+            // Update save button text in UI
+            const form = document.getElementById('addProductForm');
+            if (form) {
+                const saveBtn = form.querySelector('.btn-action-save');
+                if (saveBtn) {
+                    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Product';
+                }
+            }
+
+            // Switch to Add Product Form tab
+            switchTab('add-product');
+            
+            // Expand basic details card so they immediately see the form
+            const basicCard = document.getElementById('basic-info-card');
+            if (basicCard) {
+                basicCard.classList.remove('collapsed');
+                basicCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        // Helper to set preview value
+        function setPrevElementValue(elementId, value) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = value || 'N/A';
+            }
+        }
+    </script>
+    <script src="../js/add-product.js"></script>
+</body>
+
+</html>

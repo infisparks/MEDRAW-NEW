@@ -218,6 +218,19 @@ document.addEventListener('DOMContentLoaded', function () {
         container.appendChild(notice);
     }
 
+    function populateEnquiryOptions(products) {
+        const container = document.getElementById('custom-product-options');
+        if (!container) return;
+        container.innerHTML = '';
+        products.forEach(p => {
+            const option = document.createElement('div');
+            option.className = 'custom-option';
+            option.setAttribute('data-value', p.name);
+            option.textContent = p.name;
+            container.appendChild(option);
+        });
+    }
+
     // ────────────────────────────────────────────────
     // MAIN LOGIC
     // ────────────────────────────────────────────────
@@ -258,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 4. Render if we have data
         if (data) {
             // Safety: ensure arrays exist
-            renderTopItems(data.topitems   || []);
+            loadHomepageProducts();
             renderFAQs(data.faqs       || []);
             renderBlogs(data.blogs      || []);
 
@@ -272,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ultimate fallback: show message in other sections, but render DEFAULT_PRODUCTS for Top Products
             LOADING_WRAPPERS.forEach(w => {
                 if (w.id === 'top-products-wrapper') {
-                    renderTopItems([]);
+                    loadHomepageProducts();
                 } else {
                     showFallbackMessage(w.id, `Unable to load ${w.name}. Please check your connection.`);
                 }
@@ -283,18 +296,46 @@ document.addEventListener('DOMContentLoaded', function () {
     // ────────────────────────────────────────────────
     // RENDER FUNCTIONS (your original code – unchanged)
     // ────────────────────────────────────────────────
-    function renderTopItems(topitems) {
-        if (topitems && topitems.length > 0) {
-            allProducts = topitems.map(item => ({
-                name: item.topitem_name || 'Unnamed Product',
-                drug: item.topitem_drug || 'N/A',
-                image: item.topitem_image ? `images/topitems/${item.topitem_image}` : 'images/medicine.webp'
-            }));
-        } else {
-            allProducts = DEFAULT_PRODUCTS;
+    function loadHomepageProducts() {
+        const staticProducts = DEFAULT_PRODUCTS.map(item => ({
+            ...item,
+            image: item.image,
+            slug: item.slug || ''
+        }));
+
+        if (!db) {
+            allProducts = staticProducts;
+            populateEnquiryOptions(allProducts);
+            updateProductDisplay();
+            return;
         }
 
-        updateProductDisplay();
+        db.ref('add-product').on('value', snapshot => {
+            let portalProducts = [];
+            snapshot.forEach(childSnapshot => {
+                const val = childSnapshot.val();
+                const basic = val['basic-information'] || {};
+                const seo = val['seo-catalog'] || {};
+                const specs = val['specifications'] || {};
+                
+                portalProducts.push({
+                    id: childSnapshot.key,
+                    name: basic.productName || 'Unnamed Product',
+                    drug: specs.strength || basic.productCategory || 'Pharmaceuticals',
+                    image: basic.productImageUrl || 'images/product-by-default-img.png',
+                    slug: seo.productUrlSlug || ''
+                });
+            });
+
+            allProducts = [...portalProducts, ...staticProducts];
+            populateEnquiryOptions(allProducts);
+            updateProductDisplay();
+        }, error => {
+            console.error("Firebase read blocked on add-product for homepage: ", error);
+            allProducts = staticProducts;
+            populateEnquiryOptions(allProducts);
+            updateProductDisplay();
+        });
     }
 
     function updateProductDisplay() {
@@ -302,47 +343,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!wrapper) return;
         wrapper.innerHTML = '';
 
-        const viewMoreBtn = document.getElementById('view-more-products-btn');
         const viewMoreContainer = document.getElementById('view-more-container');
-        const clearBtn = document.getElementById('clear-search-btn');
 
-        // Apply filter if search query is active
-        const query = searchQuery.trim().toLowerCase();
-        let filteredProducts = allProducts;
-        
-        if (query) {
-            filteredProducts = allProducts.filter(item => 
-                item.name.toLowerCase().includes(query) || 
-                item.drug.toLowerCase().includes(query)
-            );
-            if (clearBtn) clearBtn.classList.remove('d-none');
-        } else {
-            if (clearBtn) clearBtn.classList.add('d-none');
-        }
-
-        // Determine items to display
-        let displayItems = [];
-        if (query) {
-            // Search is active: show all matches
-            displayItems = filteredProducts;
-            if (viewMoreContainer) viewMoreContainer.style.display = 'none';
-        } else {
-            // No active search: apply pagination
-            if (viewMoreContainer) {
-                if (filteredProducts.length > 8) {
-                    viewMoreContainer.style.display = 'flex';
-                } else {
-                    viewMoreContainer.style.display = 'none';
-                }
-            }
-
-            if (showingAll) {
-                displayItems = filteredProducts;
-                if (viewMoreBtn) viewMoreBtn.textContent = 'View Less Products';
-            } else {
-                displayItems = filteredProducts.slice(0, 8);
-                if (viewMoreBtn) viewMoreBtn.textContent = 'View More Products';
-            }
+        // Always show exactly 8 products on home page, search was removed from home page.
+        let displayItems = allProducts.slice(0, 8);
+        if (viewMoreContainer) {
+            viewMoreContainer.style.display = 'flex';
         }
 
         if (displayItems.length === 0) {
@@ -365,9 +371,10 @@ document.addEventListener('DOMContentLoaded', function () {
             
             const card = `
                 <div class="col-6 col-md-6 col-lg-3">
-                    <div class="card wow fadeInUp product-card" data-wow-delay="${delay}s">
+                    <div class="card wow fadeInUp product-card" data-slug="${item.slug || ''}" data-wow-delay="${delay}s" style="cursor: pointer;">
                         <div class="product-img-wrapper">
-                            <img src="${item.image}" class="product-img" alt="${item.name}">
+                            <img src="${item.image}" class="product-img" alt="${item.name}" onerror="this.src='images/product-by-default-img.png'; this.parentElement.classList.add('show-default-overlay');">
+                            <div class="default-img-overlay">www.medrawpharma.com</div>
                         </div>
                         <hr class="my-2">
                         <div class="card-body">
@@ -630,22 +637,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    const viewMoreBtn = document.getElementById('view-more-products-btn');
-    if (viewMoreBtn) {
-        viewMoreBtn.addEventListener('click', function() {
-            if (showingAll) {
-                showingAll = false;
-                updateProductDisplay();
-                const section = document.getElementById('top-products');
-                if (section) {
-                    section.scrollIntoView({ behavior: 'smooth' });
-                }
-            } else {
-                showingAll = true;
-                updateProductDisplay();
-            }
-        });
-    }
+    // Handle click on product card to open details page
+    $(document).on('click', '.product-card', function() {
+        const slug = $(this).attr('data-slug');
+        if (slug) {
+            window.location.href = `product/index.html?slug=${slug}`;
+        } else {
+            const productName = $(this).find('.card-title').text().trim();
+            window.location.href = `product/index.html?name=${encodeURIComponent(productName)}`;
+        }
+    });
 
     // ────────────────────────────────────────────────
     // QUICK ENQUIRY POPUP CARD LOGIC
