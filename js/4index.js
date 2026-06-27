@@ -641,10 +641,10 @@ document.addEventListener('DOMContentLoaded', function () {
     $(document).on('click', '.product-card', function() {
         const slug = $(this).attr('data-slug');
         if (slug) {
-            window.location.href = `product/index.html?slug=${slug}`;
+            window.location.href = `product/?slug=${slug}`;
         } else {
             const productName = $(this).find('.card-title').text().trim();
-            window.location.href = `product/index.html?name=${encodeURIComponent(productName)}`;
+            window.location.href = `product/?name=${encodeURIComponent(productName)}`;
         }
     });
 
