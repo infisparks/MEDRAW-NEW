@@ -302,27 +302,32 @@
                                         placeholder="Write a detailed product description, purpose, and benefits"
                                         required></textarea>
                                 </div>
-                                <div class="col-lg-12 mb-2">
-                                    <label class="form-label">Product Image</label>
-                                    <div class="image-upload-zone" id="imageUploadZone">
-                                        <input type="file" id="prodImage" class="d-none" accept=".jpg,.jpeg,.png,.webp">
-                                        <div class="upload-icon">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <div class="col-lg-12 mb-3">
+                                    <label class="form-label" for="prodImage">Product Image URL <span class="text-danger">*</span></label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text"><i class="fa-solid fa-link"></i></span>
+                                        <input type="url" id="prodImage" class="form-control" placeholder="https://example.com/image.jpg" required>
+                                    </div>
+                                    <div class="form-text text-muted mb-2 d-flex flex-wrap gap-3" style="font-size: 11px;">
+                                        <span><i class="fa-solid fa-weight-hanging text-secondary me-1"></i> Max size: <strong>500 KB</strong></span>
+                                        <span><i class="fa-solid fa-expand text-secondary me-1"></i> Recommended: <strong>500x700 px (5:7 ratio)</strong></span>
+                                        <span><i class="fa-solid fa-fill-drip text-secondary me-1"></i> Background: <strong>White</strong></span>
+                                    </div>
+                                    <div class="image-url-preview-container" id="imageUrlPreviewContainer">
+                                        <div class="preview-placeholder" id="previewPlaceholder">
+                                            <i class="fa-regular fa-image"></i>
+                                            <span>Image preview will appear here</span>
+                                            <small>Please enter a valid, reachable image URL</small>
                                         </div>
-                                        <div class="upload-instructions">
-                                            Drag & drop product image here or <span>browse files</span>
-                                            <br>
-                                            <small class="text-muted">Max size: 500 KB (5:7 ratio)</small>
-                                        </div>
-                                        <div class="image-preview-overlay d-none" id="imagePreviewOverlay">
-                                            <img id="imagePreviewImg" src="" alt="Preview">
-                                            <button type="button" class="btn-remove-preview"
-                                                onclick="resetImageUpload()">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
+                                        <img id="imagePreviewImg" class="d-none" src="" alt="Product Image Preview">
+                                        <div id="previewErrorMsg" class="d-none preview-error-msg">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            <span>Invalid or Unreachable Image URL</span>
+                                            <small>Please verify the URL points to a valid image file.</small>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -1873,17 +1878,13 @@
                 handleCategoryChange();
             }
 
-            // Image Preview in dropzone
-            if (typeof resetImageUpload === 'function') {
-                resetImageUpload();
+            // Image Preview
+            const imgInput = document.getElementById('prodImage');
+            if (imgInput) {
+                imgInput.value = basic.productImageUrl || '';
             }
-            if (basic.productImageUrl) {
-                const previewOverlay = document.getElementById('imagePreviewOverlay');
-                const previewImg = document.getElementById('imagePreviewImg');
-                if (previewImg && previewOverlay) {
-                    previewImg.src = basic.productImageUrl;
-                    previewOverlay.classList.remove('d-none');
-                }
+            if (typeof validateAndPreviewImageUrl === 'function') {
+                validateAndPreviewImageUrl(basic.productImageUrl || '');
             }
 
             // 2. Specifications

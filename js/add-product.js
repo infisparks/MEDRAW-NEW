@@ -6,8 +6,8 @@
 let productKeywords = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Setup dropzone events
-    setupImageDropzone();
+    // Setup image URL preview events
+    setupImageUrlPreview();
     
     // Setup tags input events
     setupTagsInput();
@@ -67,108 +67,101 @@ function toggleInputsRequired(container, isRequired) {
 }
 
 /**
- * setupImageDropzone
+ * setupImageUrlPreview
  */
-function setupDropzoneElement(dropzoneId, fileInputId, previewOverlayId, previewImgId) {
-    const dropzone = document.getElementById(dropzoneId);
-    const fileInput = document.getElementById(fileInputId);
-    
-    if (!dropzone || !fileInput) return;
-    
-    dropzone.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-remove-preview')) return;
-        fileInput.click();
-    });
-    
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = 'var(--accent-color)';
-        dropzone.style.backgroundColor = 'var(--secondary-color)';
-    });
-    
-    dropzone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = '#cbd5e1';
-        dropzone.style.backgroundColor = '#fafbfc';
-    });
-    
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.style.borderColor = '#cbd5e1';
-        dropzone.style.backgroundColor = '#fafbfc';
+function setupImageUrlPreview() {
+    const imgInput = document.getElementById('prodImage');
+    if (imgInput) {
+        imgInput.addEventListener('input', (e) => {
+            validateAndPreviewImageUrl(e.target.value.trim());
+        });
         
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            fileInput.files = e.dataTransfer.files;
-            handleImagePreviewElement(fileInput.files[0], fileInputId, previewOverlayId, previewImgId);
-        }
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-        if (fileInput.files && fileInput.files[0]) {
-            handleImagePreviewElement(fileInput.files[0], fileInputId, previewOverlayId, previewImgId);
-        }
-    });
-}
-
-function setupImageDropzone() {
-    setupDropzoneElement('imageUploadZone', 'prodImage', 'imagePreviewOverlay', 'imagePreviewImg');
-    setupDropzoneElement('imageUploadZone2', 'prodImage2', 'imagePreviewOverlay2', 'imagePreviewImg2');
+        imgInput.addEventListener('change', (e) => {
+            validateAndPreviewImageUrl(e.target.value.trim());
+        });
+    }
 }
 
 /**
- * Handles image selection validation and preview
+ * Validates and previews the image URL
  */
-function handleImagePreviewElement(file, fileInputId, previewOverlayId, previewImgId) {
-    if (!file) return;
+function validateAndPreviewImageUrl(url) {
+    const imgInput = document.getElementById('prodImage');
+    const previewContainer = document.getElementById('imageUrlPreviewContainer');
+    const placeholder = document.getElementById('previewPlaceholder');
+    const previewImg = document.getElementById('imagePreviewImg');
+    const errorMsg = document.getElementById('previewErrorMsg');
     
-    // Check type: JPG, JPEG, PNG, WEBP
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-        showNotification('Invalid Type', 'Please upload a JPG, JPEG, PNG, or WEBP image.', 'error');
-        resetImageUploadElement(fileInputId, previewOverlayId, previewImgId);
+    if (!imgInput || !previewContainer || !placeholder || !previewImg || !errorMsg) return;
+    
+    // Clear custom validity by default
+    imgInput.setCustomValidity('');
+    previewContainer.classList.remove('has-preview', 'has-error');
+    
+    if (!url) {
+        // No URL, show placeholder
+        placeholder.classList.remove('d-none');
+        previewImg.classList.add('d-none');
+        previewImg.src = '';
+        errorMsg.classList.add('d-none');
         return;
     }
     
-    // Check size: Max 500 KB
-    const maxSize = 500 * 1024; // 500 KB
-    if (file.size > maxSize) {
-        showNotification('File Too Large', 'Product image size cannot exceed 500 KB.', 'error');
-        resetImageUploadElement(fileInputId, previewOverlayId, previewImgId);
+    // Validate syntax
+    try {
+        new URL(url);
+    } catch (_) {
+        // Invalid URL syntax
+        placeholder.classList.add('d-none');
+        previewImg.classList.add('d-none');
+        previewImg.src = '';
+        errorMsg.classList.remove('d-none');
+        previewContainer.classList.add('has-error');
+        imgInput.setCustomValidity('Please enter a valid URL.');
         return;
     }
     
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const previewOverlay = document.getElementById(previewOverlayId);
-        const previewImg = document.getElementById(previewImgId);
-        
-        previewImg.src = e.target.result;
-        previewOverlay.classList.remove('d-none');
+    // Attempt to load image to check if it's correct/reachable
+    placeholder.classList.add('d-none');
+    errorMsg.classList.add('d-none');
+    
+    const tempImg = new Image();
+    tempImg.onload = function() {
+        // Successfully loaded! Show the preview image
+        previewImg.src = url;
+        previewImg.classList.remove('d-none');
+        placeholder.classList.add('d-none');
+        errorMsg.classList.add('d-none');
+        previewContainer.classList.add('has-preview');
+        imgInput.setCustomValidity(''); // Clear custom error
     };
-    reader.readAsDataURL(file);
+    tempImg.onerror = function() {
+        // Failed to load! Show error message
+        previewImg.src = '';
+        previewImg.classList.add('d-none');
+        placeholder.classList.add('d-none');
+        errorMsg.classList.remove('d-none');
+        previewContainer.classList.add('has-error');
+        imgInput.setCustomValidity('Could not load image. Please verify the URL points to a valid image file.');
+    };
+    tempImg.src = url;
 }
 
 /**
- * Reset upload zones
+ * Reset upload zones (for compatibility)
  */
-function resetImageUploadElement(fileInputId, previewOverlayId, previewImgId) {
-    const fileInput = document.getElementById(fileInputId);
-    const previewOverlay = document.getElementById(previewOverlayId);
-    const previewImg = document.getElementById(previewImgId);
-    
-    if (fileInput) fileInput.value = '';
-    if (previewImg) previewImg.src = '';
-    if (previewOverlay) previewOverlay.classList.add('d-none');
-}
-
 function resetImageUpload() {
-    resetImageUploadElement('prodImage', 'imagePreviewOverlay', 'imagePreviewImg');
+    const imgInput = document.getElementById('prodImage');
+    if (imgInput) {
+        imgInput.value = '';
+    }
+    validateAndPreviewImageUrl('');
 }
 
 function resetImageUpload2() {
-    resetImageUploadElement('prodImage2', 'imagePreviewOverlay2', 'imagePreviewImg2');
+    // No-op for second image since it is not used in the UI
 }
+
 
 /**
  * Setup keyword tags input
@@ -325,9 +318,16 @@ function setupFormActions() {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Ensure firebase db and storage are loaded
-        if (!window.db || !window.storage) {
-            showNotification('Firebase Error', 'Firebase database or storage is not initialized. Please reload page.', 'error');
+        // Ensure firebase db is loaded
+        if (!window.db) {
+            showNotification('Firebase Error', 'Firebase database is not initialized. Please reload page.', 'error');
+            return;
+        }
+        
+        // Ensure image URL is valid and loaded without errors
+        const imgInput = document.getElementById('prodImage');
+        if (imgInput && imgInput.validationMessage) {
+            imgInput.reportValidity();
             return;
         }
         
@@ -438,50 +438,12 @@ function setupFormActions() {
                 })
                 .finally(() => {
                     saveBtn.disabled = false;
-                    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Add Product';
+                    saveBtn.innerHTML = isEditing ? '<i class="fa-solid fa-floppy-disk"></i> Update Product' : '<i class="fa-solid fa-floppy-disk"></i> Add Product';
                 });
         };
 
-        const uploadImagePromise = (fileInputId, fileNamePrefix, productId) => {
-            return new Promise((resolve, reject) => {
-                const imgInput = document.getElementById(fileInputId);
-                if (!imgInput || !imgInput.files || imgInput.files.length === 0) {
-                    resolve("");
-                    return;
-                }
-                const file = imgInput.files[0];
-                const fileExtension = file.name.split('.').pop();
-                const fileName = `${fileNamePrefix}_product_${productId}.${fileExtension}`;
-                const storageRef = window.storage.ref();
-                const fileRef = storageRef.child(`products/${productId}/${fileName}`);
-                
-                const uploadTask = fileRef.put(file);
-                uploadTask.on('state_changed', null,
-                    (error) => reject(error),
-                    () => {
-                        uploadTask.snapshot.ref.getDownloadURL()
-                            .then(url => resolve(url))
-                            .catch(err => reject(err));
-                    }
-                );
-            });
-        };
-
-        const hasPrimary = document.getElementById('prodImage').files && document.getElementById('prodImage').files.length > 0;
-        
-        if (hasPrimary) {
-            showNotification('Uploading', 'Uploading product image...', 'info');
-            uploadImagePromise('prodImage', 'primary', productId).then((primaryUrl) => {
-                saveProductData(primaryUrl, "");
-            }).catch((error) => {
-                console.error('Image upload error:', error);
-                showNotification('Upload Error', 'Failed to upload product image: ' + error.message, 'error');
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Add Product';
-            });
-        } else {
-            saveProductData("", "");
-        }
+        const imageUrl = imgInput ? imgInput.value.trim() : '';
+        saveProductData(imageUrl, "");
     });
 }
 
@@ -618,7 +580,7 @@ function previewProduct() {
     prevImageContainer.innerHTML = '';
     
     let hasPreview = false;
-    if (previewImg && previewImg.src) {
+    if (previewImg && previewImg.src && !previewImg.classList.contains('d-none')) {
         const img = document.createElement('img');
         img.src = previewImg.src;
         img.style.maxWidth = '100%';
@@ -629,7 +591,7 @@ function previewProduct() {
     }
     
     if (!hasPreview) {
-        prevImageContainer.innerHTML = '<span class="text-muted">No product image uploaded</span>';
+        prevImageContainer.innerHTML = '<span class="text-muted">No product image URL entered</span>';
     }
     
     // Open modal (setting style display flex explicitly overrides inline display none)
