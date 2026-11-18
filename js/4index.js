@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ────────────────────────────────────────────────
     // CONFIGURATION
     // ────────────────────────────────────────────────
-    const CACHE_KEY         = 'gnh_hero_main_cache_v2';     // change version when data structure changes
+    const CACHE_KEY         = 'gnh_hero_main_cache_v3';     // change version when data structure changes
     const CACHE_MAX_AGE_MIN = 60;                           // consider data fresh for 60 minutes
     const CACHE_STALE_MIN   = 1440;                         // allow stale data up to 24 hours as last resort
 
@@ -107,26 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { id: 'blog-wrapper',         name: 'Blogs' }
     ];
 
-    const DEFAULT_PRODUCTS = [
-        { name: "Keytruda 100mg/4ml", drug: "Pembrolizumab", image: "images/1.png" },
-        { name: "Saxenda 6mg/3ml", drug: "Liraglutide", image: "images/2.png" },
-        { name: "Stelara 90mg", drug: "Ustekinumab", image: "images/3.png" },
-        { name: "Vyzulta 2.5ml", drug: "Latanoprostene bunod", image: "images/4.png" },
-        { name: "Mounjaro KwikPen 5mg", drug: "Tirzepatide", image: "images/6.png" },
-        { name: "Ocrevus", drug: "Ocrelizumab", image: "images/7.png" },
-        { name: "Thymogam", drug: "Anti-Thymocyte Globulin", image: "images/8.png" },
-        { name: "VIVJOA", drug: "Oteseconazole", image: "images/9.png" },
-        { name: "TORSEMIDE 20MG", drug: "TORSEMIDE", image: "images/10.png" },
-        { name: "Ef-Cort 100", drug: "Hydrocortisone Sodium Succinate IP", image: "images/12.png" },
-        { name: "Duomate Transhaler", drug: "Formoterol Fumarate and Beclomethasone Dipropionate Powder For Inhalation", image: "images/13.png" },
-        { name: "Forxiga 10mg", drug: "Dapagliflozin", image: "images/14.png" },
-        { name: "Ezanic 15gm Gel", drug: "Azelaic Acid Gel", image: "images/15.png" },
-        { name: "Loxoject", drug: "Naloxone", image: "images/16.png" },
-        { name: "Sabril", drug: "Vigabatrinum", image: "images/17.png" },
-        { name: "Aristada - 1064mg", drug: "Aripiprazole Lauroxil", image: "images/18.png" },
-        { name: "ZBD 400", drug: "Albendazole", image: "images/19.png" },
-        { name: "Oxacilline Pour Inj USP", drug: "Oxacillin Sodium USP", image: "images/20.png" }
-    ];
+    const DEFAULT_PRODUCTS = [];
 
     function observeDynamicWowElements(container) {
         if ('IntersectionObserver' in window) {
@@ -347,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Always show exactly 8 products on home page, search was removed from home page.
         let displayItems = allProducts.slice(0, 8);
         if (viewMoreContainer) {
-            viewMoreContainer.style.display = 'flex';
+            viewMoreContainer.style.display = displayItems.length > 0 ? 'flex' : 'none';
         }
 
         if (displayItems.length === 0) {
