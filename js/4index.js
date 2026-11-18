@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ────────────────────────────────────────────────
     // CONFIGURATION
     // ────────────────────────────────────────────────
-    const CACHE_KEY         = 'gnh_hero_main_cache_v1';     // change version when data structure changes
+    const CACHE_KEY         = 'gnh_hero_main_cache_v2';     // change version when data structure changes
     const CACHE_MAX_AGE_MIN = 60;                           // consider data fresh for 60 minutes
     const CACHE_STALE_MIN   = 1440;                         // allow stale data up to 24 hours as last resort
 
@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function () {
         { name: "Saxenda 6mg/3ml", drug: "Liraglutide", image: "images/2.png" },
         { name: "Stelara 90mg", drug: "Ustekinumab", image: "images/3.png" },
         { name: "Vyzulta 2.5ml", drug: "Latanoprostene bunod", image: "images/4.png" },
-        { name: "Wilate 500IU+500IU", drug: "von Willebrand Factor / Factor VIII", image: "images/5.png" },
         { name: "Mounjaro KwikPen 5mg", drug: "Tirzepatide", image: "images/6.png" },
         { name: "Ocrevus", drug: "Ocrelizumab", image: "images/7.png" },
         { name: "Thymogam", drug: "Anti-Thymocyte Globulin", image: "images/8.png" },

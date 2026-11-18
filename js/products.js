@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ────────────────────────────────────────────────
     // CONFIGURATION & CACHE
     // ────────────────────────────────────────────────
-    const CACHE_KEY         = 'gnh_hero_main_cache_v1';
+    const CACHE_KEY         = 'gnh_hero_main_cache_v2';
     const CACHE_MAX_AGE_MIN = 60;
     const CACHE_STALE_MIN   = 1440;
 
@@ -106,7 +106,6 @@ document.addEventListener('DOMContentLoaded', function () {
         { name: "Saxenda 6mg/3ml", drug: "Liraglutide", image: "images/2.png", slug: "saxenda-6mg" },
         { name: "Stelara 90mg", drug: "Ustekinumab", image: "images/3.png", slug: "stelara-90mg" },
         { name: "Vyzulta 2.5ml", drug: "Latanoprostene bunod", image: "images/4.png", slug: "vyzulta-25ml" },
-        { name: "Wilate 500IU+500IU", drug: "von Willebrand Factor / Factor VIII", image: "images/5.png", slug: "wilate-500iu" },
         { name: "Mounjaro KwikPen 5mg", drug: "Tirzepatide", image: "images/6.png", slug: "mounjaro-5mg" },
         { name: "Ocrevus", drug: "Ocrelizumab", image: "images/7.png", slug: "ocrevus" },
         { name: "Thymogam", drug: "Anti-Thymocyte Globulin", image: "images/8.png", slug: "thymogam" },
